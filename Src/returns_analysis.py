@@ -1,4 +1,4 @@
-import pandas as pd
+import pandas as pd  # type: ignore
 
 # load cleaned dataset
 df = pd.read_csv("data/cleaned data/clean_data.csv")

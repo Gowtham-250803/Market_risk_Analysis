@@ -1,4 +1,4 @@
-import pandas as pd
+import pandas as pd  # type: ignore
 
 # read dataset and skip faulty rows
 df = pd.read_csv("data/raw data/msft_stock_data_faulty_raw.csv", skiprows=2)
