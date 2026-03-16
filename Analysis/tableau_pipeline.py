@@ -31,16 +31,21 @@ def export_monte_carlo_bands(portfolio_paths, time_horizon=252, output_dir='Outp
 
 def export_historical_metrics(log_returns, rolling_vol_30d, weights, initial_value=1000000, output_dir='Output', filename='alphapulse_historical_risk.csv'):
     """Calculates daily drawdowns, risk regimes, and historical portfolio values."""
+
     # Reconstruct historical portfolio daily values
     historical_port_returns = np.dot(log_returns, weights)
     cumulative_hist_returns = np.exp(np.cumsum(historical_port_returns))
     historical_values = initial_value * cumulative_hist_returns
-    # Ensure 1-D arrays/series for DataFrame construction
     historical_values = np.asarray(historical_values).squeeze()
-    if hasattr(rolling_vol_30d, 'values'):
-        rolling_vol = np.asarray(rolling_vol_30d).squeeze()
+
+    # Compute a single time series of portfolio volatility.
+    # If rolling_vol_30d is a DataFrame (asset-level), aggregate using the portfolio weights.
+    if isinstance(rolling_vol_30d, pd.DataFrame):
+        portfolio_returns = pd.Series(historical_port_returns, index=log_returns.index)
+        rolling_vol = portfolio_returns.rolling(window=30).std() * np.sqrt(252)
     else:
-        rolling_vol = np.asarray(rolling_vol_30d).squeeze()
+        # Assume it's already a 1-D series/array aligned with log_returns index
+        rolling_vol = pd.Series(np.asarray(rolling_vol_30d).squeeze(), index=log_returns.index)
 
     historical_data = pd.DataFrame({
         'Date': log_returns.index,

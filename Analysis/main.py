@@ -1,6 +1,7 @@
 import os
 import numpy as np
-from data_ingestion import load_data, calculate_log_returns
+# 1. CHANGE: Import 'load_multiple_data' instead of 'load_data'
+from data_ingestion import load_multiple_data, calculate_log_returns
 from quant_engine import calculate_core_metrics, run_monte_carlo, calculate_var
 from tableau_pipeline import export_correlation_matrix, export_monte_carlo_bands, export_historical_metrics
 
@@ -11,15 +12,28 @@ def run_alphapulse():
     output_dir = 'Output'
     os.makedirs(output_dir, exist_ok=True)
 
-    # 1. Data Ingestion
-    # Load cleaned price data (use Close prices for returns)
-    prices = load_data('Data/Cleaned Data/clean_data.csv')
-    if 'Close' in prices.columns:
-        prices = prices[['Close']]
+    # 2. CHANGE: Create a list of all your CSV files
+    # Replace these placeholder paths with the actual locations of your multiple CSV files
+    portfolio_files = [
+        'Data/Cleaned Data/Tech_stock_data.csv',
+        'Data/Cleaned Data/Healthcare_stock_data.csv',
+        'Data/Cleaned Data/Energy_stock_data.csv',
+        'Data/Cleaned Data/Crypto_stock_data.csv'
+        # Add as many files as you have!
+    ]
+
+    # 3. CHANGE: Use the multiple file loader
+    prices = load_multiple_data(portfolio_files)
+    
+    if prices.empty:
+        print("Error: No data loaded. Check your file paths.")
+        return
+
     log_returns = calculate_log_returns(prices)
     
     # 2. Quant Math Setup
     num_assets = len(prices.columns)
+    print(f"Successfully loaded {num_assets} assets for the portfolio.")
     weights = np.full(num_assets, 1/num_assets) # Equal weighting
     initial_value = 1000000 # $1M baseline
     
@@ -34,11 +48,28 @@ def run_alphapulse():
     
     # 4. Tableau Data Engineering & Export
     print("Formatting data for Tableau visualization...")
-    export_correlation_matrix(log_returns, output_dir=output_dir)
-    export_monte_carlo_bands(mc_paths, output_dir=output_dir)
-    export_historical_metrics(log_returns, rolling_vol_30d, weights, initial_value, output_dir=output_dir)
     
-    print("Pipeline Complete. Data is ready for Tableau.")
+    # 4. CHANGE: Export results into the Output directory
+    export_correlation_matrix(
+        log_returns,
+        output_dir=output_dir,
+        filename='alphapulse_correlation_matrix.csv'
+    )
+    export_monte_carlo_bands(
+        mc_paths,
+        output_dir=output_dir,
+        filename='alphapulse_mc_bands.csv'
+    )
+    export_historical_metrics(
+        log_returns,
+        rolling_vol_30d,
+        weights,
+        initial_value,
+        output_dir=output_dir,
+        filename='alphapulse_historical_risk.csv'
+    )
+    
+    print(f"Pipeline Complete. Data is saved in the '{output_dir}' folder and ready for Tableau.")
 
 if __name__ == "__main__":
     run_alphapulse()
