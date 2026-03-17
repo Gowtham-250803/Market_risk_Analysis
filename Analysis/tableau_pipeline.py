@@ -69,3 +69,32 @@ def export_historical_metrics(log_returns, rolling_vol_30d, weights, initial_val
     filepath = os.path.join(output_dir, filename)
     historical_data.dropna().to_csv(filepath, index=False)
     print(f"Exported: {filepath}")
+
+def export_efficient_frontier(results, weights_record, asset_names, filename='alphapulse_efficient_frontier.csv'):
+    """
+    Packages the Efficient Frontier simulations into a Tableau-ready CSV.
+    Tags the 'Optimal' (Max Sharpe) and 'Minimum Risk' portfolios.
+    """
+    # Create a DataFrame from the results array
+    ef_df = pd.DataFrame({
+        'Expected_Return': results[0,:],
+        'Risk_Volatility': results[1,:],
+        'Sharpe_Ratio': results[2,:]
+    })
+    
+    # Add the weights for each asset as separate columns
+    for counter, asset in enumerate(asset_names):
+        ef_df[f'Weight_{asset}'] = [w[counter] for w in weights_record]
+        
+    # Find the Optimal and Min Risk portfolios to flag them for Tableau
+    max_sharpe_idx = ef_df['Sharpe_Ratio'].idxmax()
+    min_vol_idx = ef_df['Risk_Volatility'].idxmin()
+    
+    # Create a 'Portfolio_Type' column for easy color-coding in Tableau
+    ef_df['Portfolio_Type'] = 'Simulated Portfolio'
+    ef_df.loc[max_sharpe_idx, 'Portfolio_Type'] = 'Max Sharpe (Optimal)'
+    ef_df.loc[min_vol_idx, 'Portfolio_Type'] = 'Minimum Volatility'
+    
+    # Export to CSV
+    ef_df.to_csv(filename, index=False)
+    print(f"Exported Efficient Frontier with {len(ef_df)} simulations: {filename}")

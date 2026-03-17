@@ -71,3 +71,37 @@ def calculate_var(portfolio_paths, initial_value=1000000, confidence_level=5):
     percentile_worst_case = np.percentile(simulated_end_values, confidence_level)
     var_value = initial_value - percentile_worst_case
     return var_value
+
+def generate_efficient_frontier(mean_returns, cov_matrix, num_portfolios=5000, risk_free_rate=0.02):
+    """
+    Simulates thousands of random portfolio weights to find the Efficient Frontier.
+    Returns an array of Returns, Volatilities, Sharpe Ratios, and the corresponding Weights.
+    """
+    num_assets = len(mean_returns)
+    
+    # Arrays to hold our simulation results
+    results = np.zeros((3, num_portfolios))
+    weights_record = []
+    
+    for i in range(num_portfolios):
+        # Generate random weights and normalize them so they sum to 1.0 (100%)
+        weights = np.random.random(num_assets)
+        weights /= np.sum(weights)
+        weights_record.append(weights)
+        
+        # Calculate Expected Annualized Return
+        # Assuming 252 trading days in a year
+        portfolio_return = np.sum(mean_returns * weights) * 252
+        
+        # Calculate Expected Annualized Volatility (Risk)
+        portfolio_std_dev = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights))) * np.sqrt(252)
+        
+        # Calculate Sharpe Ratio
+        sharpe_ratio = (portfolio_return - risk_free_rate) / portfolio_std_dev
+        
+        # Store results
+        results[0,i] = portfolio_return
+        results[1,i] = portfolio_std_dev
+        results[2,i] = sharpe_ratio
+        
+    return results, weights_record

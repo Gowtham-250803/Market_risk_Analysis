@@ -4,6 +4,8 @@ import numpy as np
 from data_ingestion import load_multiple_data, calculate_log_returns
 from quant_engine import calculate_core_metrics, run_monte_carlo, calculate_var
 from tableau_pipeline import export_correlation_matrix, export_monte_carlo_bands, export_historical_metrics
+from quant_engine import calculate_core_metrics, run_monte_carlo, calculate_var, generate_efficient_frontier
+from tableau_pipeline import export_correlation_matrix, export_monte_carlo_bands, export_historical_metrics, export_efficient_frontier
 
 def run_alphapulse():
     print("Initializing AlphaPulse Quantitative Engine...")
@@ -68,6 +70,19 @@ def run_alphapulse():
         output_dir=output_dir,
         filename='alphapulse_historical_risk.csv'
     )
+    
+    print(f"Pipeline Complete. Data is saved in the '{output_dir}' folder and ready for Tableau.")
+
+    #The Markowitz Efficient Frontier simulation
+    print("Optimizing Portfolio (Calculating Efficient Frontier)...")
+    
+    # Run the simulation engine (5,000 portfolios)
+    ef_results, ef_weights = generate_efficient_frontier(mean_returns, cov_matrix)
+    
+    # Export the results for Tableau
+    ef_file = os.path.join(output_dir, 'alphapulse_efficient_frontier.csv')
+    asset_names = prices.columns.tolist()
+    export_efficient_frontier(ef_results, ef_weights, asset_names, filename=ef_file)
     
     print(f"Pipeline Complete. Data is saved in the '{output_dir}' folder and ready for Tableau.")
 
