@@ -1,5 +1,5 @@
-import pandas as pd
-import numpy as np
+import pandas as pd  # type: ignore
+import numpy as np  # type: ignore
 
 # load dataset with returns
 df = pd.read_csv("data/cleaned data/returns_data.csv")
