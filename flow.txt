@@ -1,0 +1,41 @@
+START
+  |
+  v
+[Data Collection]
+  - Crypto, Energy, Healthcare, Tech stock data
+  - Historical returns dataset
+  |
+  v
+[Data Preprocessing]
+  - Data cleaning
+  - Date formatting
+  - Return calculations
+  |
+  v
+[Risk & Statistical Analysis]
+  - Correlation Matrix
+  - Rolling Volatility
+  - Sharpe Ratio
+  |
+  v
+[Simulation & Modeling]
+  - Monte Carlo Simulation
+  - Portfolio scenarios (P25, P50, P75)
+  |
+  v
+[Optimization]
+  - Efficient Frontier
+  - Risk vs Return analysis
+  |
+  v
+[Data Visualization]
+  - Tableau Dashboard creation
+  - Charts & insights generation
+  |
+  v
+[Final Insights & Decision Making]
+  - Risk evaluation
+  - Portfolio optimization insights
+  |
+  v
+END
